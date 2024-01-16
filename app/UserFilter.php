@@ -27,7 +27,7 @@ class UserFilter extends QueryFilter
             'skills' => 'array|exists:skills,id',
             'from' => 'date_format:d/m/Y',
             'to' => 'date_format:d/m/Y',
-            'order' => 'in:last_name,email,date,last_name-desc,email-desc,date-desc',
+            'order' => ['regex:/^(last_name|email|date)(-desc)?$/'],
             'trashed' => 'accepted',
         ];
     }
