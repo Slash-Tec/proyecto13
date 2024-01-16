@@ -30,7 +30,7 @@
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
-        <env name="DB_DATABASE" value="tddlaravel_test"/>
+        <env name="DB_DATABASE" value="proyecto13"/>
         <env name="DEBUGBAR_ENABLED" value="false"/>
         <env name="QUERY_DETECTOR_ENABLED" value="false"/>
     </php>

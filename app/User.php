@@ -16,6 +16,7 @@ class User extends Authenticatable
         'active' => 'bool'
     ];
 
+
     /**
      * The attributes that should be hidden for arrays.
      *

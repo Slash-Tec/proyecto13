@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\DB;
 class UserFilter extends QueryFilter
 {
 
+
+    protected $aliasses = [
+        'date' => 'created_at',
+    ];
+
+    public function getColumnName($alias)
+    {
+        return $this->aliasses[$alias] ?? $alias;
+    }
+
     public function filterRules(): array
     {
         return [
@@ -17,8 +27,7 @@ class UserFilter extends QueryFilter
             'skills' => 'array|exists:skills,id',
             'from' => 'date_format:d/m/Y',
             'to' => 'date_format:d/m/Y',
-            'order' => 'in:last_name,email,created_at',
-            'direction' => 'in:asc,desc',
+            'order' => 'in:last_name,email,date,last_name-desc,email-desc,date-desc',
             'trashed' => 'accepted',
         ];
     }
@@ -65,12 +74,11 @@ class UserFilter extends QueryFilter
 
     public function order($query, $value)
     {
-        $query->orderBy($value, $this->valid['direction'] ?? 'asc');
-    }
-
-    public function direction($query, $value)
-    {
-
+        if (Str::endsWith($value, '-desc')){
+            $query->orderByDesc($this->getColumnName(Str::susbtr($value,0,-5)));
+        } else {
+            $query->orderBy($this->getColumnName($value));
+        }
     }
 
     public function trashed($query, $value)

@@ -6,52 +6,48 @@ use Illuminate\Support\Arr;
 
 class Sortable
 {
-    protected $currentColumn;
-    protected $currentDirection;
     protected $currentUrl;
+    protected $query = [];
 
     public function __construct($currentUrl)
     {
         $this->currentUrl = $currentUrl;
     }
 
-    public function setCurrentOrder($column, $direction = 'asc')
-    {
-        $this->currentColumn = $column;
-        $this->currentDirection = $direction;
-    }
-
     public function url($column)
     {
-        if ($this->currentColumn == $column && $this->currentDirection == 'asc') {
-            return $this->buildSortableUrl($column, 'desc');
+        if ($this->isSortingBy($column)) {
+            return $this->buildSortableUrl($column . '-desc');
         }
 
         return $this->buildSortableUrl($column);
     }
 
-    protected function buildSortableUrl($column, $direction = 'asc')
+    protected function buildSortableUrl($order)
     {
-        return $this->currentUrl.'?'.Arr::query(['order' => $column, 'direction' => $direction]);
+        return $this->currentUrl . '?' . Arr::query(array_merge($this->query, ['order' => $order]));
     }
 
-    protected function isSortingBy($column, $direction)
+    protected function isSortingBy($column)
     {
-        return $this->currentColumn == $column && $this->currentDirection == $direction;
+        return Arr::get($this->query, 'order') == $column;
     }
 
     public function classes($column)
     {
-        if ($this->isSortingBy($column, 'asc')) {
+        if ($this->isSortingBy($column)) {
             return 'link-sortable link-sorted-up';
         }
 
-        if ($this->isSortingBy($column, 'desc')) {
+        if ($this->isSortingBy($column . '-desc')) {
             return 'link-sortable link-sorted-down';
         }
 
         return 'link-sortable';
     }
 
-
+    public function appends(array $query)
+    {
+        $this->query = $query;
+    }
 }
