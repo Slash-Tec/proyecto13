@@ -31,7 +31,7 @@ class CreateUserRequest extends FormRequest
             'first_name' => 'required',
             'last_name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required',
+            'password' => 'required|min:6',
             'role' => ['nullable', 'in:'.implode(',', Role::getList())],
             'bio' => 'required',
             'twitter' => 'nullable|present|url',
@@ -52,7 +52,8 @@ class CreateUserRequest extends FormRequest
             'first_name.required' => 'El campo nombre es obligatorio',
             'last_name.required' => 'El campo apellidos es obligatorio',
             'email.required' => 'El campo email es obligatorio',
-            'password.required' => 'El campo contraseña es obligatorio'
+            'password.required' => 'El campo contraseña es obligatorio',
+            'password.min' => 'El campo contraseña requiere de al menos 6 caracteres'
         ];
     }
 

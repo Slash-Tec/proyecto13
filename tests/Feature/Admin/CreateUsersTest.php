@@ -166,6 +166,23 @@ class CreateUsersTest extends TestCase
     }
 
     /** @test */
+    function the_password_must_have_minimum_length()
+    {
+        $this->handleValidationExceptions();
+
+        $this->from('usuarios/nuevo')
+            ->post('usuarios', $this->withData([
+                'password' => '12345',
+            ]))
+            ->assertSessionHasErrors([
+                'password' => 'El campo contraseña requiere de al menos 6 caracteres'
+            ]);
+
+        $this->assertDatabaseEmpty('users');
+    }
+
+
+    /** @test */
     function the_email_must_be_valid()
     {
         $this->handleValidationExceptions();
