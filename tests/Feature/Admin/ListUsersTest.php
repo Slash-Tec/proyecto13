@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Login;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -90,18 +91,18 @@ class ListUsersTest extends TestCase
     /** @test */
     function users_are_ordered_by_name()
     {
-        factory(User::class)->create(['last_name' => 'John Doe']);
-        factory(User::class)->create(['last_name' => 'Richard Roe']);
-        factory(User::class)->create(['last_name' => 'Jane Doe']);
+        factory(User::class)->create(['first_name' => 'John Doe']);
+        factory(User::class)->create(['first_name' => 'Richard Roe']);
+        factory(User::class)->create(['first_name' => 'Jane Doe']);
 
-        $this->get('usuarios?order=last_name')
+        $this->get('usuarios?order=first_name')
             ->assertSeeInOrder([
                 'Jane Doe',
                 'John Doe',
                 'Richard Roe'
             ]);
 
-        $this->get('usuarios?order=last_name-desc')
+        $this->get('usuarios?order=first_name-desc')
             ->assertSeeInOrder([
                 'Richard Roe',
                 'John Doe',
@@ -154,29 +155,58 @@ class ListUsersTest extends TestCase
     }
 
     /** @test */
+    function users_are_ordered_by_login_date()
+    {
+        factory(Login::class)->create([
+            'created_at' => now()->subDays(3),
+            'user_id' => factory(User::class)->create(['first_name' => 'John Doe']),
+        ]);
+        factory(Login::class)->create([
+            'created_at' => now()->subDays(),
+            'user_id' => factory(User::class)->create(['first_name' => 'Jane Doe']),
+        ]);
+        factory(Login::class)->create([
+            'created_at' => now()->subDays(2),
+            'user_id' => factory(User::class)->create(['first_name' => 'Richard Roe']),
+        ]);
+
+        $this->get('usuarios?order=login')
+            ->assertSeeInOrder([
+                'John Doe',
+                'Richard Roe',
+                'Jane Doe',
+            ]);
+
+        $this->get('usuarios?order=login-desc')
+            ->assertSeeInOrder([
+                'Jane Doe',
+                'Richard Roe',
+                'John Doe',
+            ]);
+    }
+
+    /** @test */
     function invalid_order_query_data_is_ignored_and_the_default_order_is_used_instead()
     {
         factory(User::class)->create(['first_name' => 'John Doe', 'created_at' => now()->subDays(2)]);
         factory(User::class)->create(['first_name' => 'Jane Doe', 'created_at' => now()->subDays(5)]);
         factory(User::class)->create(['first_name' => 'Richard Roe', 'created_at' => now()->subDays(3)]);
 
-        $this->get('/usuarios?order=id')
-            ->assertOk()
+        $this->get('usuarios?order=id')
             ->assertSeeInOrder([
                 'John Doe',
                 'Richard Roe',
                 'Jane Doe',
             ]);
 
-        $this->get('/usuarios?order=invalid_column')
-            ->assertOk()
+        $this->get('usuarios?order=invalid_column')
             ->assertSeeInOrder([
                 'John Doe',
                 'Richard Roe',
                 'Jane Doe',
             ]);
 
-        $this->get('/usuarios?order=first_name-descendent')
+        $this->get('usuarios?order=first_name-descendent')
             ->assertSeeInOrder([
                 'John Doe',
                 'Richard Roe',

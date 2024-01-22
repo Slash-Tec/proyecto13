@@ -2,9 +2,11 @@
 
 namespace App;
 
+use App\Filters\UserFilter;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -13,9 +15,9 @@ class User extends Authenticatable
     protected $guarded = [];
 
     protected $casts = [
-        'active' => 'bool'
+        'active' => 'bool',
+        'last_login_at' => 'datetime',
     ];
-
 
     /**
      * The attributes that should be hidden for arrays.
@@ -29,6 +31,11 @@ class User extends Authenticatable
     public function newEloquentBuilder($query)
     {
         return new UserQuery($query);
+    }
+
+    public function newQueryFilter()
+    {
+        return new UserFilter;
     }
 
     public function profile()
@@ -68,8 +75,16 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function scopeFilterBy($query, QueryFilter $filters, array $data)
+    public function delete()
     {
-        return $filters->applyTo($query, $data);
+        DB::transaction(function () {
+            if (parent::delete()) {
+                $this->profile()->delete();
+
+                DB::table('skill_user')
+                    ->where('user_id', $this->id)
+                    ->update(['deleted_at' => now()]);
+            }
+        });
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateSkillUserTable extends Migration
 {
@@ -14,15 +14,16 @@ class CreateSkillUserTable extends Migration
     public function up()
     {
         Schema::create('skill_user', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
 
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->unsignedInteger('skill_id');
+            $table->unsignedBigInteger('skill_id');
             $table->foreign('skill_id')->references('id')->on('skills');
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -8,15 +8,15 @@ use App\Profession;
 use App\Skill;
 use App\Sortable;
 use App\User;
-use App\UserFilter;
 use Illuminate\Database\Eloquent\Builder;
 
 class UserController extends Controller
 {
-    public function index(UserFilter $userFilter, Sortable $sortable)
+    public function index(Sortable $sortable)
     {
         $users = User::query()
             ->with('team', 'skills', 'profile.profession')
+            ->withLastLogin()
             ->onlyTrashedIf(request()->routeIs('users.trashed'))
             ->when(request('team'), function (Builder $query, $team) {
                 if ($team === 'with_team') {
@@ -25,13 +25,11 @@ class UserController extends Controller
                     $query->doesntHave('team');
                 }
             })
-            ->filterBy($userFilter,
-                request()->only(['state', 'role', 'search', 'skills', 'from', 'to', 'order']))
+            ->applyFilters()
             ->orderByDesc('created_at')
             ->paginate();
 
-        $users->appends($userFilter->valid());
-        $sortable->appends($userFilter->valid());
+        $sortable->appends($users->parameters());
 
         return view('users.index')
             ->with([
@@ -74,7 +72,6 @@ class UserController extends Controller
 
     public function trash(User $user)
     {
-        $user->profile()->delete();
         $user->delete();
 
         return redirect()->route('users.index');

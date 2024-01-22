@@ -25,47 +25,55 @@ class SortableTest extends TestCase
     /** @test */
     function return_css_classes_to_indicate_the_column_is_sorted_in_ascendent_order()
     {
-        $this->sortable->appends(['order' => 'name']);
+        $this->sortable->appends(['order' => 'first_name']);
 
-        $this->assertSame('link-sortable link-sorted-up', $this->sortable->classes('name'));
+        $this->assertSame('link-sortable link-sorted-up', $this->sortable->classes('first_name'));
     }
 
     /** @test */
     function return_css_classes_to_indicate_the_column_is_sorted_in_descendent_order()
     {
-        $this->sortable->appends(['order' => 'name-desc']);
+        $this->sortable->appends(['order' => 'first_name-desc']);
 
-        $this->assertSame('link-sortable link-sorted-down', $this->sortable->classes('name'));
+        $this->assertSame('link-sortable link-sorted-down', $this->sortable->classes('first_name'));
     }
 
     /** @test */
     function builds_a_url_with_sortable_data()
     {
         $this->assertSame(
-            'http://curso-laravel/demo?order=name',
-            $this->sortable->url('name')
+            'http://curso-laravel/demo?order=first_name',
+            $this->sortable->url('first_name')
         );
     }
 
     /** @test */
     function builds_a_url_with_descendent_order_if_the_current_column_matches_the_given_one_and_the_current_direction_is_asc(
-    )
-    {
-        $this->sortable->appends(['order' => 'name']);
+    ) {
+        $this->sortable->appends(['order' => 'first_name']);
         $this->assertSame(
-            'http://curso-laravel/demo?order=name-desc',
-            $this->sortable->url('name')
+            'http://curso-laravel/demo?order=first_name-desc',
+            $this->sortable->url('first_name')
         );
     }
 
-    /** @test **/
+    /** @test */
     function appends_query_data_to_the_url()
     {
         $this->sortable->appends(['a' => 'parameter', 'and' => 'another-parameter']);
 
         $this->assertSame(
-            'http://proyecto13.local/demo?a=parameter&and=another-parameter&order=first_name',
+            'http://curso-laravel/demo?a=parameter&and=another-parameter&order=first_name',
             $this->sortable->url('first_name')
         );
+    }
+
+    /** @test */
+    function gets_the_info_about_the_column_name_and_the_order_direction()
+    {
+        $this->assertSame(['first_name', 'asc'], Sortable::info('first_name'));
+        $this->assertSame(['first_name', 'desc'], Sortable::info('first_name-desc'));
+        $this->assertSame(['email', 'asc'], Sortable::info('email'));
+        $this->assertSame(['email', 'desc'], Sortable::info('email-desc'));
     }
 }

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class Sortable
 {
@@ -14,10 +15,15 @@ class Sortable
         $this->currentUrl = $currentUrl;
     }
 
+    public function appends(array $query)
+    {
+        $this->query = $query;
+    }
+
     public function url($column)
     {
         if ($this->isSortingBy($column)) {
-            return $this->buildSortableUrl($column . '-desc');
+            return $this->buildSortableUrl($column.'-desc');
         }
 
         return $this->buildSortableUrl($column);
@@ -25,7 +31,7 @@ class Sortable
 
     protected function buildSortableUrl($order)
     {
-        return $this->currentUrl . '?' . Arr::query(array_merge($this->query, ['order' => $order]));
+        return $this->currentUrl.'?'.Arr::query(array_merge($this->query, ['order' => $order]));
     }
 
     protected function isSortingBy($column)
@@ -39,15 +45,19 @@ class Sortable
             return 'link-sortable link-sorted-up';
         }
 
-        if ($this->isSortingBy($column . '-desc')) {
+        if ($this->isSortingBy($column.'-desc')) {
             return 'link-sortable link-sorted-down';
         }
 
         return 'link-sortable';
     }
 
-    public function appends(array $query)
+    public static function info($order)
     {
-        $this->query = $query;
+        if (Str::endsWith($order, '-desc')) {
+            return [Str::substr($order, 0, -5), 'desc'];
+        } else {
+            return [$order, 'asc'];
+        }
     }
 }
