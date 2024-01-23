@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+
 use App\Skill;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -154,5 +155,34 @@ class FilterUsersTest extends TestCase
             ->contains($oldUser)
             ->notContains($newestUser)
             ->notContains($newUser);
+    }
+
+    /** @test */
+    function it_paginates_the_users_filtered_by_php_skill()
+    {
+        $php = factory(\App\Skill::class)->create(['name' => 'php']);
+        $css = factory(\App\Skill::class)->create(['name' => 'css']);
+
+        $phpUsers = factory(\App\User::class, 20)->create();
+        $phpUsers->each(function ($user) use ($php) {
+            $user->skills()->attach($php->id);
+        });
+
+        $cssUsers = factory(\App\User::class, 20)->create();
+        $cssUsers->each(function ($user) use ($css) {
+            $user->skills()->attach($css->id);
+        });
+
+        $response = $this->get("usuarios?skills[0]={$php->id}")
+            ->assertStatus(200)
+            ->assertViewIs('users.index')
+            ->assertViewHas('users')
+            ->assertSeeText('php');
+
+        $response = $this->get("usuarios?skills[0]={$php->id}&page=2")
+            ->assertStatus(200)
+            ->assertViewIs('users.index')
+            ->assertViewHas('users')
+            ->assertSeeText('php');
     }
 }
