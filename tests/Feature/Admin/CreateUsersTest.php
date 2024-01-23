@@ -322,6 +322,33 @@ class CreateUsersTest extends TestCase
     }
 
     /** @test */
+    function skills_are_optional()
+    {
+        $profession = factory(Profession::class)->create();
+
+        $this->post('usuarios', $this->withData([
+            'skills' => [],
+            'profession_id' => $profession->id,
+        ]))->assertRedirect('usuarios');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'pepe@mail.es',
+            'role' => 'user',
+        ]);
+
+        $user = User::findByEmail('pepe@mail.es');
+
+        $this->assertDatabaseHas('user_profiles', [
+            'user_id' => $user->id,
+            'bio' => "Programador de Laravel y VueJS",
+            'twitter' => 'https://twitter.com/pepe',
+            'profession_id' => $profession->id,
+        ]);
+        
+        $this->assertEmpty($user->skills);
+    }
+
+    /** @test */
     function the_role_field_is_optional()
     {
         $this->handleValidationExceptions();
