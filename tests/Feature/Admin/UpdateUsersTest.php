@@ -271,4 +271,84 @@ class UpdateUsersTest extends TestCase
             'first_name' => 'Pepe',
         ]);
     }
+
+    /** @test */
+    function the_profession_id_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+
+        $this->from('usuarios/'.$user->id.'/editar')
+            ->put('usuarios/'.$user->id, $this->withData([
+                'profession_id' => '999'
+            ]))->assertRedirect('usuarios/'.$user->id.'/editar')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseMissing('users', [
+            'first_name' => 'Pepe',
+        ]);
+    }
+
+    /** @test */
+    function only_not_deleted_professions_can_be_selected()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+        $deletedProfession = factory(Profession::class)->create([
+            'deleted_at' => now()->format('Y-m-d'),
+        ]);
+
+        $this->from('usuarios/'.$user->id.'/editar')
+            ->put('usuarios/'.$user->id, $this->withData([
+                'profession_id' => $deletedProfession->id
+            ]))->assertRedirect('usuarios/'.$user->id.'/editar')
+            ->assertSessionHasErrors(['profession_id']);
+
+        $this->assertDatabaseMissing('users', [
+            'first_name' => 'Pepe',
+        ]);
+    }
+
+    /** @test */
+    function the_skills_must_be_an_array()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+
+        $this->from('usuarios/'.$user->id.'/editar')
+            ->put('usuarios/'.$user->id, $this->withData([
+                'skills' => 'PHP, JS'
+            ]))->assertRedirect('usuarios/'.$user->id.'/editar')
+            ->assertSessionHasErrors(['skills']);
+
+        $this->assertDatabaseMissing('users', [
+            'first_name' => 'Pepe',
+        ]);
+    }
+
+    /** @test */
+    function the_skills_must_be_valid()
+    {
+        $this->handleValidationExceptions();
+
+        $user = factory(User::class)->create();
+        $skillA = factory(Skill::class)->create();
+        $skillB = factory(Skill::class)->create();
+
+        $this->from('usuarios/'.$user->id.'/editar')
+            ->put('usuarios/'.$user->id, $this->withData([
+                'skills' => [$skillA->id, $skillB->id + 1]
+            ]))->assertRedirect('usuarios/'.$user->id.'/editar')
+            ->assertSessionHasErrors(['skills']);
+
+        $this->assertDatabaseMissing('users', [
+            'first_name' => 'Pepe',
+        ]);
+    }
 }
+
+
+

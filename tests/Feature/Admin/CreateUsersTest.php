@@ -344,7 +344,7 @@ class CreateUsersTest extends TestCase
             'twitter' => 'https://twitter.com/pepe',
             'profession_id' => $profession->id,
         ]);
-        
+
         $this->assertEmpty($user->skills);
     }
 
