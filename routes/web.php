@@ -30,6 +30,8 @@ Route::delete('usuarios/{id}', 'UserController@destroy')
     ->name('user.destroy');
 Route::get('usuarios/papelera', 'UserController@index')
     ->name('users.trashed');
+Route::patch('/users/{user}/restore', 'UserController@restore')
+    ->name('users.restore');
 Route::get('usuarios/{user}', 'UserController@show')
     ->name('users.show');
 Route::patch('usuarios/{user}/papelera', 'UserController@trash')

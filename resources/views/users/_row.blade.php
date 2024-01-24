@@ -17,10 +17,18 @@
     </td>
     <td class="text-right">
         @if ($user->trashed())
-            <form action="{{ route('user.destroy', $user) }}" method="POST">
+            <form action="{{ route('users.restore', $user) }}" method="POST" class="d-inline">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-outline-success btn-sm">
+                    <span class="material-symbols-outlined">restore</span>
+                </button>
+            </form>
+            <form action="{{ route('user.destroy', $user) }}" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-link"><span class="material-symbols-outlined">delete_forever</span>
+                <button type="submit" class="btn btn-link">
+                    <span class="material-symbols-outlined">delete_forever</span>
                 </button>
             </form>
         @else

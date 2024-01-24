@@ -88,6 +88,18 @@ class UserController extends Controller
         return redirect()->route('users.trashed');
     }
 
+    public function restore($id)
+    {
+        $user = User::onlyTrashed()->where('id', $id)->firstOrFail();
+
+        abort_unless($user->trashed(), 404);
+
+        $user->restore();
+
+        return redirect()->route('users.index')->with('success', 'Usuario restaurado exitosamente');
+    }
+
+
     protected function form($view, User $user)
     {
         return view($view, [
