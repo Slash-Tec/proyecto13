@@ -348,6 +348,30 @@ class UpdateUsersTest extends TestCase
             'first_name' => 'Pepe',
         ]);
     }
+
+    /** @test */
+    public function it_restores_a_soft_deleted_user_and_updates_deleted_at_to_null()
+    {
+        $user = factory(User::class)->create();
+        $user->skills()->attach(factory(Skill::class)->create());
+
+        $this->patch(route('user.trash', $user->id))
+            ->assertRedirect(route('users.index'));
+
+        $this->assertSoftDeleted('users', ['id' => $user->id]);
+        $this->assertSoftDeleted('skill_user', ['user_id' => $user->id]);
+        $this->assertSoftDeleted('user_profiles', ['user_id' => $user->id]);
+
+        $response = $this->patch(route('users.restore', $user->id));
+
+        $response->assertRedirect(route('users.index'));
+
+        $user->refresh();
+
+        $this->assertFalse($user->trashed());
+
+        $this->assertNull($user->deleted_at);
+    }
 }
 
 
