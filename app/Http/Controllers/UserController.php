@@ -83,6 +83,8 @@ class UserController extends Controller
 
         abort_unless($user->trashed(), 404);
 
+        $user->skills()->detach();
+
         $user->forceDelete();
 
         return redirect()->route('users.trashed');
